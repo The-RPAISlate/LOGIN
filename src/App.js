@@ -3,19 +3,57 @@ import password from "./password.json";
 import "./style.css";
 import OtpInput from "react-otp-input";
 const Login = () => {
-  const [code, setCode] = useState("");
+  
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const handleChange = (code) => setCode(code);
-   
+  const [errorMessages, setErrorMessages] = useState({});
+  
+  const errors = {
+    eid: "invalid username",
+    pass: "invalid password",
+  };
+  const handleSubmit = (event) => {
+    //Prevent page reload
+    event.preventDefault();
+
+    var { eid, pass } = document.forms[0];
+
+    // Find user login info
+    const userData = password.find((user) => user.emp_id === eid.value);
+
+    // Compare user info
+    if (userData) {
+      if (userData.password !== pass.value) {
+        // Invalid password
+        setErrorMessages({ name: "pass", message: errors.pass });
+      } else {
+        setIsSubmitted(true);
+        window.location.assign("/dashboard");
+      }
+    } else {
+      // Username not found
+      setErrorMessages({ name: "eid", message: errors.eid });
+    }
+  };
+
+
+   /// for error message
+  const renderErrorMessage = (name) =>
+    name === errorMessages.name && (
+      <div className="error">{errorMessages.message}</div>
+    );
   // JSX code for login form
   const renderForm = (
     <div className="form">
-      <form onSubmit={handleChange}>
+      <form onSubmit={handleSubmit}>
+      <div className="input-container">
+          <label>Username </label>
+          <input type="password" name="eid" required />
+          {renderErrorMessage("eid")}
+        </div>
         <div className="input-container">
           <label>OTP Login </label>
           <OtpInput
-        value={isSubmitted ? "123456" : ""}
-        onChange={code}
+       
         numInputs={6}
         separator={<span style={{ width: "8px" }}></span>}
         isInputNum={true}
@@ -26,9 +64,10 @@ const Login = () => {
           width: "54px",
           height: "54px",
           fontSize: "12px",
-          color: "#000",
+          color: "#111",
           fontWeight: "400",
           caretColor: "blue"
+          
         }}
         focusStyle={{
           border: "1px solid #CFD3DB",
